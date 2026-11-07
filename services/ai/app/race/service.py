@@ -243,6 +243,9 @@ def _guard_ai_changes(window: list[dict[str, Any]], adaptation: Any) -> list[dic
             base_km = session.get("distance_km")
             if change.distance_km is not None and base_km:
                 after["distance_km"] = round(min(change.distance_km, base_km * 1.1), 1)
+            elif base_km and base and after["duration_minutes"] != base:
+                # A new duration without a distance keeps the pace, not the old kilometres.
+                after["distance_km"] = round(base_km * after["duration_minutes"] / base, 1)
         changes.append(
             {
                 "session_id": session["id"],

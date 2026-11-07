@@ -30,7 +30,7 @@ from app.race import service
 from app.race.ai.client import AIStatus, AIUnavailable, UnavailableAI, get_race_ai, strict_schema
 from app.race.ai.models import LangChainRaceAI
 from app.race.ai.personalize import apply_layer_guardrails, apply_plan_edits
-from app.race.ai.schemas import AILayer, AIPlan
+from app.race.ai.schemas import AdaptChange, AIAdaptation, AILayer, AIPlan
 from app.race.context import RaceContext, render, summarize_course
 from app.race.engine import adapt as engine_adapt
 from app.race.engine.brief import build_brief
@@ -292,6 +292,52 @@ def test_adaptation_rules_reduce_load_and_apply() -> None:
     assert rested[0]["kind"] in ("rest", "easy")
     assert engine_adapt.classify("my knee hurts on descents") == "injury"
     assert engine_adapt.classify("crazy week at work") == "time"
+
+
+def test_ai_change_to_duration_scales_distance_and_climbing() -> None:
+    # A 155-minute long run cut to 40 minutes must not keep 18.5 km and +350 m.
+    long_run = {
+        "id": "w3-sat",
+        "date": "2026-11-07",
+        "kind": "long",
+        "sport": "trail_running",
+        "title": "Long trail run",
+        "duration_minutes": 155,
+        "distance_km": 18.5,
+        "elevation_m": 350,
+        "intensity": "easy",
+    }
+    shorter = AIAdaptation(
+        summary="Knee pain: keep it short and flat.",
+        safety_note=None,
+        changes=[
+            AdaptChange(
+                session_id="w3-sat",
+                change="modify",
+                title="Short flat easy run",
+                purpose=None,
+                duration_minutes=40,
+                distance_km=None,
+                intensity="very_easy",
+                reason="Knee pain on descents.",
+            )
+        ],
+    )
+    changes = service._guard_ai_changes([long_run], shorter)
+    assert changes[0]["after"]["duration_minutes"] == 40
+    assert changes[0]["after"]["distance_km"] == 4.8  # same pace: 18.5 km * 40 / 155
+    plan = {"weeks": [{"sessions": [copy.deepcopy(long_run)]}]}
+    session = engine_adapt.apply_changes(plan, changes)["weeks"][0]["sessions"][0]
+    assert (session["duration_minutes"], session["distance_km"]) == (40, 4.8)
+    assert session["elevation_m"] == 91  # 350 m * 4.8 / 18.5
+
+    # A distance the model gives is kept (within +10 %), and climbing follows it.
+    shorter.changes[0].distance_km = 6.0
+    changes = service._guard_ai_changes([long_run], shorter)
+    assert changes[0]["after"]["distance_km"] == 6.0
+    plan = {"weeks": [{"sessions": [copy.deepcopy(long_run)]}]}
+    session = engine_adapt.apply_changes(plan, changes)["weeks"][0]["sessions"][0]
+    assert session["elevation_m"] == 114
 
 
 def test_render_labels_provenance_and_missing_sources() -> None:
