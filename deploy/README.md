@@ -43,4 +43,4 @@ Each deploy: build ARM images → pull on the server → `alembic upgrade head` 
 auth, user, training and ai → `up -d --wait` → `https://API_DOMAIN/health`.
 Roll back: Actions → Deploy → Run workflow with an older commit SHA.
 
-See the root `README.md` for the commands.
+See "Run it yourself" in the root `README.md` for the commands and every setting.
