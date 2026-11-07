@@ -196,7 +196,9 @@ const styles = StyleSheet.create({
   inputWrap: { flexDirection: "row", alignItems: "center", minHeight: 52, borderRadius: R.md, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   inputFocused: { borderColor: C.text },
   inputError: { borderColor: C.serious },
-  input: { flex: 1, minHeight: 50, paddingHorizontal: 16, color: C.text, ...ui(16, 500) },
+  // minWidth 0: a browser <input> won't shrink below its intrinsic width beside a unit otherwise.
+  // No browser outline: the field's border already turns white on focus.
+  input: { flex: 1, minWidth: 0, minHeight: 50, paddingHorizontal: 16, color: C.text, outlineStyle: "solid", outlineWidth: 0, ...ui(16, 500) },
   choiceWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   choice: { flexDirection: "row", alignItems: "center", gap: 8, minHeight: 44, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   choiceOn: { backgroundColor: C.white, borderColor: C.white },
