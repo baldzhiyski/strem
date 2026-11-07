@@ -47,8 +47,8 @@ e2e/         Playwright browser tests against real services
 
 ## Run
 
-Start the backend stack (`../strem-infra/README.md`, then
-`python scripts/seed-demo.py` for the demo athlete), then:
+Start the backend first ("Run it yourself" in the root `README.md`, including every
+setting and Strava), then:
 
 ```bash
 npm install
