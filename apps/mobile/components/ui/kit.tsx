@@ -6,7 +6,7 @@
  * per view (white primary), recessive chrome, and provenance always visible.
  */
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -27,8 +27,22 @@ import { C, R, brand, disp, mono, ui } from "@/constants/theme";
 export const WIDE = 1024;
 export const MEDIUM = 680;
 
+const noSubscription = () => () => {};
+
+/**
+ * The window size, safe for the pre-rendered web pages. They are rendered without
+ * a window (0 x 0), and the browser's first render must match that HTML or React
+ * keeps the server's styles. So the size reads 0 while the page hydrates and is
+ * real right after; screens that mount later get the real size straight away.
+ */
+export function useWindowSize() {
+  const size = useWindowDimensions();
+  const hydrated = useSyncExternalStore(noSubscription, () => true, () => false);
+  return hydrated ? size : { width: 0, height: 0 };
+}
+
 export function useLayout() {
-  const { width } = useWindowDimensions();
+  const { width } = useWindowSize();
   return { width, wide: width >= WIDE, medium: width >= MEDIUM };
 }
 

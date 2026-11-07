@@ -4,11 +4,11 @@
  */
 
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Icon, type IconName } from "@/components/ui/icon";
-import { Button, Overline, Row, Wordmark, useLayout } from "@/components/ui/kit";
+import { Button, Overline, Row, Wordmark, useLayout, useWindowSize } from "@/components/ui/kit";
 import { HeroMedia } from "@/components/ui/photo";
 import { C, LAYER_COLOR, R, disp, ui } from "@/constants/theme";
 import type { CoverMedia } from "@/lib/api/race-missions";
@@ -45,7 +45,7 @@ const STEPS = [
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { height } = useWindowDimensions();
+  const { height } = useWindowSize();
   const { wide } = useLayout();
   const pad = wide ? 40 : 20;
   const start = () => router.push(routeForScreen("identity"));
