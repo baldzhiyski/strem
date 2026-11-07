@@ -206,10 +206,16 @@ def apply_changes(plan: dict[str, Any], changes: list[dict[str, Any]]) -> dict[s
                     if after.get(key) is not None:
                         s[key] = after[key]
                 if "distance_km" in after:
+                    old_km = s.get("distance_km")
                     if after["distance_km"] is None:
                         s.pop("distance_km", None)
                     else:
                         s["distance_km"] = after["distance_km"]
+                        # Climbing shrinks and grows with the distance it was planned for.
+                        if old_km and s.get("elevation_m"):
+                            s["elevation_m"] = round(
+                                s["elevation_m"] * after["distance_km"] / old_km
+                            )
                 if after.get("kind") == "cross":
                     s["sport"] = "other"
                     s.pop("elevation_m", None)
