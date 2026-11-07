@@ -7,12 +7,12 @@ import {
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { Icon } from "@/components/ui/icon";
+import { useWindowSize } from "@/components/ui/kit";
 import { TopoArt } from "@/components/ui/photo";
 import { C, disp, mono, ui } from "@/constants/theme";
 
@@ -24,9 +24,10 @@ interface AuthShellProps {
 }
 
 export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
-  const { width } = useWindowDimensions();
+  const { width } = useWindowSize();
   const wide = width >= 900;
-  const contentWidth = Math.max(0, Math.min(width - (wide ? 104 : 40), 1120));
+  // Before the width is known (pre-rendered web page), fill the screen with the phone margins.
+  const contentWidth = width ? Math.min(width - (wide ? 104 : 40), 1120) : "100%";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,7 +38,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.content, { width: contentWidth }, wide && styles.contentWide]}>
+          <View style={[styles.content, { width: contentWidth }, !width && styles.contentFluid, wide && styles.contentWide]}>
             <View style={[styles.story, wide && styles.storyWide]}>
               <View style={styles.brandRow}>
                 <View style={styles.brandMark}>
@@ -129,6 +130,7 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, paddingVertical: 28, justifyContent: "center", alignItems: "center" },
   scrollWide: { paddingVertical: 44 },
   content: { alignSelf: "center", gap: 28 },
+  contentFluid: { paddingHorizontal: 20 },
   contentWide: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 72 },
   story: { alignSelf: "stretch", gap: 25 },
   storyWide: { flex: 1, maxWidth: 620, gap: 34 },
